@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Facebook Ads Performance Dashboard | FOOGLESEO</title>
+  <meta name="description" content="Hệ thống báo cáo hiệu suất quảng cáo Facebook Ads chuyên nghiệp tích hợp biểu đồ tương tác và nhập dữ liệu động từ Excel.">
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- CDNs for External Libraries -->
+  <!-- SheetJS (Excel Parser) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- ApexCharts (Interactive Charts) -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand-section">
+        <div class="brand-logo">
+          <i data-lucide="bar-chart-3"></i>
+        </div>
+        <span class="brand-name">FOOGLE Ads</span>
+      </div>
+
+      <!-- Client Quick Profile -->
+      <div class="client-profile-card">
+        <span class="profile-label">Khách Hàng</span>
+        <span id="sidebar-client-name" class="client-name">Đang tải...</span>
+        <span id="sidebar-report-period" class="client-meta">Đang tải...</span>
+      </div>
+
+      <!-- Menu Items -->
+      <nav class="nav-menu">
+        <div class="nav-item active" data-tab="tab-dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Tổng Quan KPI</span>
+        </div>
+        <div class="nav-item" data-tab="tab-campaigns">
+          <i data-lucide="layers"></i>
+          <span>Hiệu Suất Chiến Dịch</span>
+        </div>
+        <div class="nav-item" data-tab="tab-adsets">
+          <i data-lucide="target"></i>
+          <span>Hiệu Suất Ad Set</span>
+        </div>
+        <div class="nav-item" data-tab="tab-daily">
+          <i data-lucide="line-chart"></i>
+          <span>Xu Hướng Theo Ngày</span>
+        </div>
+        <div class="nav-item" data-tab="tab-insights">
+          <i data-lucide="lightbulb"></i>
+          <span>Nhận Xét & Đề Xuất</span>
+        </div>
+        <div class="nav-item" data-tab="tab-import" style="margin-top: 12px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+          <i data-lucide="file-spreadsheet" style="color: var(--success-color);"></i>
+          <span style="color: var(--success-text);">Nhập Báo Cáo Excel</span>
+        </div>
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <button class="theme-toggle-btn">
+          <span style="display: flex; align-items: center; gap: 8px;">
+            <i id="theme-icon" data-lucide="sun"></i>
+            <span id="theme-text">Giao diện Sáng</span>
+          </span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Panel -->
+    <main class="main-content">
+      
+      <!-- Top Header Area -->
+      <header class="main-header">
+        <div class="header-info">
+          <h1 id="header-title">Báo Cáo Hiệu Suất Facebook Ads</h1>
+          <p id="header-subtitle">Dữ liệu phân tích hiệu suất chiến dịch Meta quảng cáo</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-secondary" id="btn-export-pdf">
+            <i data-lucide="printer"></i>
+            <span>Xuất PDF / In</span>
+          </button>
+          <button class="btn btn-primary" id="btn-export-excel">
+            <i data-lucide="download"></i>
+            <span>Tải Excel</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Client and Report Metadata Bar -->
+      <div class="client-header-meta">
+        <div class="meta-field">
+          <span class="meta-label">Khách hàng</span>
+          <span class="meta-value" id="client-name">...</span>
+        </div>
+        <div class="meta-field">
+          <span class="meta-label">Mã KH</span>
+          <span class="meta-value" id="client-id">...</span>
+        </div>
+        <div class="meta-field">
+          <span class="meta-label">Kỳ Báo Cáo</span>
+          <span class="meta-value" id="report-period">...</span>
+        </div>
+        <div class="meta-field">
+          <span class="meta-label">Kỳ So Sánh</span>
+          <span class="meta-value" id="report-compare">...</span>
+        </div>
+        <div class="meta-field">
+          <span class="meta-label">Người liên hệ</span>
+          <span class="meta-value" id="client-contact">...</span>
+        </div>
+        <div class="meta-field" style="display:none;">
+          <span class="meta-label">Email</span>
+          <span class="meta-value" id="client-email">...</span>
+        </div>
+        <div class="meta-field" style="display:none;">
+          <span class="meta-label">Số điện thoại</span>
+          <span class="meta-value" id="client-phone">...</span>
+        </div>
+        <div class="meta-field">
+          <span class="meta-label">Ngày Lập</span>
+          <span class="meta-value" id="report-date">...</span>
+        </div>
+        <div class="meta-field">
+          <span class="meta-label">Người Lập</span>
+          <span class="meta-value" id="report-author">...</span>
+        </div>
+        <div class="meta-field">
+          <span class="meta-label">Phiên bản</span>
+          <span class="meta-value" id="report-version">...</span>
+        </div>
+      </div>
+
+      <!-- Tab View 1: KPI Overview Dashboard -->
+      <section id="tab-dashboard" class="tab-view active">
+        <!-- Core KPI Cards Grid -->
+        <div class="grid-4col">
+          <div class="card kpi-card" id="kpi-spend">
+            <div class="kpi-header">
+              <span class="kpi-title">Tổng Chi Phí</span>
+              <div class="kpi-icon"><i data-lucide="credit-card"></i></div>
+            </div>
+            <div class="kpi-value">0 ₫</div>
+            <div class="kpi-sparkline" id="sparkline-spend"></div>
+            <div class="kpi-footer">
+              <span class="kpi-delta up">0%</span>
+              <span class="kpi-label-compare">so với tháng trước</span>
+            </div>
+          </div>
+
+          <div class="card kpi-card" id="kpi-revenue">
+            <div class="kpi-header">
+              <span class="kpi-title">Doanh Thu</span>
+              <div class="kpi-icon"><i data-lucide="trending-up"></i></div>
+            </div>
+            <div class="kpi-value">0 ₫</div>
+            <div class="kpi-sparkline" id="sparkline-revenue"></div>
+            <div class="kpi-footer">
+              <span class="kpi-delta up">0%</span>
+              <span class="kpi-label-compare">so với tháng trước</span>
+            </div>
+          </div>
+
+          <div class="card kpi-card" id="kpi-roas">
+            <div class="kpi-header">
+              <span class="kpi-title">Chỉ số ROAS</span>
+              <div class="kpi-icon"><i data-lucide="percent"></i></div>
+            </div>
+            <div class="kpi-value">0.00x</div>
+            <div class="kpi-sparkline" id="sparkline-roas"></div>
+            <div class="kpi-footer">
+              <span class="kpi-delta up">0%</span>
+              <span class="kpi-label-compare">so với tháng trước</span>
+            </div>
+          </div>
+
+          <div class="card kpi-card" id="kpi-cpa">
+            <div class="kpi-header">
+              <span class="kpi-title">CPA Trung Bình</span>
+              <div class="kpi-icon"><i data-lucide="user-check"></i></div>
+            </div>
+            <div class="kpi-value">0 ₫</div>
+            <div class="kpi-sparkline" id="sparkline-cpa"></div>
+            <div class="kpi-footer">
+              <span class="kpi-delta down">0%</span>
+              <span class="kpi-label-compare">so với tháng trước</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Secondary KPIs Cards Grid -->
+        <div class="grid-4col" style="margin-bottom: 24px;">
+          <div class="card kpi-card" id="kpi-conversions">
+            <div class="kpi-header">
+              <span class="kpi-title">Lượt Chuyển Đổi</span>
+              <div class="kpi-icon"><i data-lucide="shopping-cart"></i></div>
+            </div>
+            <div class="kpi-value">0</div>
+            <div class="kpi-footer">
+              <span class="kpi-delta up">0%</span>
+              <span class="kpi-label-compare">so với tháng trước</span>
+            </div>
+          </div>
+
+          <div class="card kpi-card" id="kpi-ctr">
+            <div class="kpi-header">
+              <span class="kpi-title">CTR Trung Bình</span>
+              <div class="kpi-icon"><i data-lucide="mouse-pointer-click"></i></div>
+            </div>
+            <div class="kpi-value">0.00%</div>
+            <div class="kpi-footer">
+              <span class="kpi-delta up">0%</span>
+              <span class="kpi-label-compare">so với tháng trước</span>
+            </div>
+          </div>
+
+          <div class="card kpi-card" id="kpi-cpc">
+            <div class="kpi-header">
+              <span class="kpi-title">CPC Trung Bình</span>
+              <div class="kpi-icon"><i data-lucide="dollar-sign"></i></div>
+            </div>
+            <div class="kpi-value">0 ₫</div>
+            <div class="kpi-footer">
+              <span class="kpi-delta down">0%</span>
+              <span class="kpi-label-compare">so với tháng trước</span>
+            </div>
+          </div>
+
+          <div class="card kpi-card" id="kpi-impressions">
+            <div class="kpi-header">
+              <span class="kpi-title">Lượt Hiển Thị</span>
+              <div class="kpi-icon"><i data-lucide="eye"></i></div>
+            </div>
+            <div class="kpi-value">0</div>
+            <div class="kpi-footer">
+              <span class="kpi-delta up">0%</span>
+              <span class="kpi-label-compare">so với tháng trước</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Highlights & Detailed Comparison Table -->
+        <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 24px;">
+          <!-- Highlights card -->
+          <div class="card highlights-card">
+            <h3 class="highlights-title">
+              <i data-lucide="award"></i> Điểm nổi bật trong kỳ
+            </h3>
+            <div class="highlights-list" id="highlights-list">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- Comparison table card -->
+          <div class="card" style="padding: 20px;">
+            <h3 class="highlights-title" style="margin-bottom: 16px;">
+              <i data-lucide="scale"></i> Bảng so sánh chi tiết với kỳ trước
+            </h3>
+            <div class="table-responsive kpi-compare-table-wrapper">
+              <table class="custom-table" id="kpi-compare-table">
+                <thead>
+                  <tr>
+                    <th class="no-sort">Chỉ Số</th>
+                    <th class="no-sort">Kỳ này</th>
+                    <th class="no-sort">Kỳ trước</th>
+                    <th class="no-sort">Thay đổi (Delta)</th>
+                    <th class="no-sort">Đánh giá</th>
+                  </tr>
+                </thead>
+                <tbody id="kpi-compare-table-body">
+                  <!-- Rendered via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab View 2: Campaign Performance -->
+      <section id="tab-campaigns" class="tab-view">
+        <div class="card" style="padding: 24px;">
+          <div class="table-controls">
+            <div class="search-input-wrapper">
+              <i data-lucide="search"></i>
+              <input type="text" id="camp-search" class="search-input" placeholder="Tìm kiếm chiến dịch...">
+            </div>
+            <div class="filter-group">
+              <select id="camp-status-filter" class="filter-select">
+                <option value="all">Tất cả trạng thái</option>
+                <option value="active">Đang chạy</option>
+                <option value="paused">Tạm dừng</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="custom-table" id="campaign-table">
+              <thead>
+                <tr id="camp-table-headers">
+                  <th data-col="stt">STT</th>
+                  <th data-col="name" style="min-width: 200px;">Tên Chiến Dịch</th>
+                  <th data-col="status">Trạng Thái</th>
+                  <th data-col="cost" onclick="handleSort('campaigns', 'cost')">Chi Phí <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th data-col="revenue" onclick="handleSort('campaigns', 'revenue')">Doanh Thu <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th data-col="roas" onclick="handleSort('campaigns', 'roas')">ROAS <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th data-col="conversions" onclick="handleSort('campaigns', 'conversions')">Chuyển Đổi <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th data-col="cpa" onclick="handleSort('campaigns', 'cpa')">CPA <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th data-col="impressions" onclick="handleSort('campaigns', 'impressions')">Hiển Thị <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th data-col="ctr" onclick="handleSort('campaigns', 'ctr')">CTR (%) <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th data-col="cpc" onclick="handleSort('campaigns', 'cpc')">CPC <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th data-col="budget" onclick="handleSort('campaigns', 'budget')">Ngân Sách/Ngày <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th class="no-sort">Ghi Chú</th>
+                </tr>
+              </thead>
+              <tbody id="camp-table-body">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab View 3: Ad Set Performance -->
+      <section id="tab-adsets" class="tab-view">
+        <div class="card" style="padding: 24px;">
+          <div class="table-controls">
+            <div class="search-input-wrapper">
+              <i data-lucide="search"></i>
+              <input type="text" id="adset-search" class="search-input" placeholder="Tìm kiếm Ad Set...">
+            </div>
+            <div class="filter-group">
+              <select id="adset-campaign-filter" class="filter-select">
+                <option value="all">Tất cả chiến dịch</option>
+                <!-- Rendered via JS -->
+              </select>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="custom-table" id="adset-table">
+              <thead>
+                <tr id="adset-table-headers">
+                  <th data-col="stt">STT</th>
+                  <th data-col="name" style="min-width: 180px;">Tên Ad Set</th>
+                  <th data-col="campaign" style="min-width: 150px;">Chiến Dịch</th>
+                  <th data-col="cost" onclick="handleSort('adsets', 'cost')">Chi Phí <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th data-col="revenue" onclick="handleSort('adsets', 'revenue')">Doanh Thu <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th data-col="roas" onclick="handleSort('adsets', 'roas')">ROAS <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th data-col="conversions" onclick="handleSort('adsets', 'conversions')">Chuyển Đổi <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th data-col="cpa" onclick="handleSort('adsets', 'cpa')">CPA <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th data-col="ctr" onclick="handleSort('adsets', 'ctr')">CTR <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th data-col="cpc" onclick="handleSort('adsets', 'cpc')">CPC <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th data-col="impressions" onclick="handleSort('adsets', 'impressions')">Hiển Thị <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th class="no-sort">Ghi Chú</th>
+                </tr>
+              </thead>
+              <tbody id="adset-table-body">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab View 4: Daily Trends -->
+      <section id="tab-daily" class="tab-view">
+        <!-- Dual Column Charts -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+          <!-- Chart 1: Revenue vs Cost -->
+          <div class="card chart-container-card">
+            <div class="chart-header">
+              <h3 class="chart-title">Biến Động Chi Phí & Doanh Thu Theo Ngày</h3>
+            </div>
+            <div class="chart-body" id="chart-cost-revenue"></div>
+          </div>
+
+          <!-- Chart 2: ROAS & CPA -->
+          <div class="card chart-container-card">
+            <div class="chart-header">
+              <h3 class="chart-title">Xu Hướng ROAS & CPA</h3>
+            </div>
+            <div class="chart-body" id="chart-roas-cpa"></div>
+          </div>
+        </div>
+
+        <!-- Daily Table -->
+        <div class="card" style="padding: 24px;">
+          <h3 class="highlights-title" style="margin-bottom: 20px;">
+            <i data-lucide="calendar"></i> Bảng thống kê chi tiết theo ngày
+          </h3>
+          <div class="table-responsive">
+            <table class="custom-table" id="daily-table">
+              <thead>
+                <tr id="daily-table-headers">
+                  <th data-col="date" onclick="handleSort('daily', 'date')">Ngày <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th data-col="cost" onclick="handleSort('daily', 'cost')">Chi Phí <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th data-col="revenue" onclick="handleSort('daily', 'revenue')">Doanh Thu <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th data-col="roas" onclick="handleSort('daily', 'roas')">ROAS <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th data-col="conversions" onclick="handleSort('daily', 'conversions')">Chuyển Đổi <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th data-col="ctr" onclick="handleSort('daily', 'ctr')">CTR (%) <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th data-col="cpc" onclick="handleSort('daily', 'cpc')">CPC <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th data-col="impressions" onclick="handleSort('daily', 'impressions')">Hiển Thị <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th data-col="cpa" onclick="handleSort('daily', 'cpa')">CPA <i class="sort-icon" data-lucide="chevrons-up-down"></i></th>
+                  <th class="no-sort">Ghi Chú</th>
+                </tr>
+              </thead>
+              <tbody id="daily-table-body">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab View 5: Insights & Recommendations -->
+      <section id="tab-insights" class="tab-view">
+        <div class="insight-section">
+          <!-- Strengths and Weaknesses -->
+          <div class="insights-grid">
+            <!-- Strengths card -->
+            <div class="card insight-card strength-card">
+              <h3 class="insight-card-title">
+                <i data-lucide="check-circle-2"></i> Điểm Mạnh trong Kỳ
+              </h3>
+              <div class="insight-item-list" id="insight-strengths">
+                <!-- Rendered via JS -->
+              </div>
+            </div>
+
+            <!-- Weaknesses card -->
+            <div class="card insight-card weakness-card">
+              <h3 class="insight-card-title">
+                <i data-lucide="alert-triangle"></i> Điểm Cần Cải Thiện
+              </h3>
+              <div class="insight-item-list" id="insight-weaknesses">
+                <!-- Rendered via JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Recommendations Checklist -->
+          <div class="card recommendations-card">
+            <h3 class="recommendations-title">
+              <i data-lucide="clipboard-list"></i> Khuyến Nghị Hành Động Cụ Thể (Trong 30 ngày tới)
+            </h3>
+            <div class="action-checklist" id="insight-recommendations">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- Conclusion Card -->
+          <div class="card conclusion-card">
+            <h3 class="insight-card-title" style="color: var(--primary-color);">
+              <i data-lucide="info"></i> Kết Luận
+            </h3>
+            <p class="conclusion-text" id="insight-conclusion">
+              <!-- Rendered via JS -->
+            </p>
+          </div>
+
+          <!-- Signature Blocks for PDF Sign-off -->
+          <div class="signatures-section">
+            <div class="signature-block">
+              <span class="signature-title">Người Lập Báo Cáo</span>
+              <span class="signature-line" id="sig-author">Nhân Viên Báo Cáo</span>
+            </div>
+            <div class="signature-block">
+              <span class="signature-title">Phê Duyệt Từ Khách Hàng</span>
+              <span class="signature-line">Khách Hàng Ký Tên</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab View 6: Import Data View -->
+      <section id="tab-import" class="tab-view">
+        <div class="card" style="padding: 40px 24px;">
+          <h2 style="font-weight: 800; font-size: 1.5rem; text-align: center; margin-bottom: 24px;">Cập Nhật Dữ Liệu Báo Cáo</h2>
+          
+          <!-- Uploader Area -->
+          <div class="upload-zone" id="upload-zone">
+            <div class="upload-icon">
+              <i data-lucide="upload-cloud"></i>
+            </div>
+            <div class="upload-text">
+              <h3>Kéo & thả file báo cáo vào đây</h3>
+              <p>Hỗ trợ file định dạng .xlsx hoặc .xls (Dung lượng tối đa 10MB)</p>
+              <button class="btn btn-primary" style="margin-top: 12px;">Chọn file từ máy tính</button>
+            </div>
+            <input type="file" id="excel-file-input" class="file-input" accept=".xlsx, .xls">
+          </div>
+
+          <!-- Guidelines -->
+          <div class="template-guidelines">
+            <h3><i data-lucide="book-open"></i> Hướng Dẫn Định Dạng File</h3>
+            <div class="guideline-steps">
+              <div class="guideline-step">
+                <div class="step-num">1</div>
+                <h4 class="step-title">Giữ Nguyên Tên Sheet</h4>
+                <p class="step-desc">File Excel của bạn cần chứa đúng tên các sheet gốc: '01_Trang_bia', '02_Tong_quan_KPI', '03_Hieu_suat_Chien_dich', v.v.</p>
+              </div>
+              <div class="guideline-step">
+                <div class="step-num">2</div>
+                <h4 class="step-title">Giữ Nguyên Cấu Trúc Cột</h4>
+                <p class="step-desc">Không chèn thêm hoặc xóa các cột trong bảng biểu. Các trường dữ liệu sẽ được đọc theo số thứ tự cột cố định.</p>
+              </div>
+              <div class="guideline-step">
+                <div class="step-num">3</div>
+                <h4 class="step-title">Tự Động Cập Nhật</h4>
+                <p class="step-desc">Sau khi upload thành công, hệ thống sẽ lưu số liệu vào LocalStorage trên trình duyệt để ghi nhớ cho lần sau.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- Load Extracted Default Data -->
+  <script src="default_data.js"></script>
+  <!-- Load Main Application Logic -->
+  <script src="app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,14 @@
+# System files
+.DS_Store
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+
+# Office temporary files
+~$*
+~$*.xlsx
+~$*.xls
+
+# Local log files
+*.log
